@@ -1,0 +1,5 @@
+pandas
+XlsxWriter
+pyodbc
+PyYAML
+azure-storage-file-share
