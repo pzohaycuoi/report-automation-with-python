@@ -1,0 +1,6 @@
+server : 'sl-autoreport.database.windows.net'
+database : 'autoreport'
+username : 'autoreport'
+password : 'fHmEnXsINwUr+M*I'
+table: 'dbo.source_api_usage_details'
+driver : '{ODBC Driver 17 for SQL Server}'

@@ -134,3 +134,5 @@ dmypy.json
 # excel file
 .xlsx
 .csv
+report-automation-with-python/test.xlsx
+report-automation-with-python/cac.xlsx
