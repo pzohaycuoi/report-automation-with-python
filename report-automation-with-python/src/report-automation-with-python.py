@@ -5,6 +5,7 @@ import argparse
 import azure.storage.fileshare as azfs
 import os
 from dotenv import load_dotenv
+from xlsxwriter.utility import xl_rowcol_to_cell
 
 
 def db_conn(serv, db, usr, pwd, driver):
@@ -40,11 +41,26 @@ def write_file(pandas_query, file_name):
     """
     Get data from pandas query and output to file
     """
+    def find_lastrow(count_row, start_row, column):
+        toal_row = count_row + start_row
+        start_range = xl_rowcol_to_cell(start_row, column)
+        end_range = xl_rowcol_to_cell(toal_row, column)
+        return start_range, end_range
+    
+    start_row = 4
+    cost_row = 5
+    cost_col = 5
+    number_rows = len(pandas_query.index)
+    first_row, last_row = find_lastrow(number_rows, start_row, cost_row)
+    print(first_row)
+    print(last_row)
+    
     writer = pandas.ExcelWriter(f"./{file_name}.xlsx", engine="xlsxwriter")
     pandas_query.to_excel(writer, sheet_name="usage",
-                          index=False, startrow=4, header=False)
+                          index=False, startrow=start_row, header=False)
     workbook = writer.book
     worksheet = writer.sheets["usage"]
+    
     # set header format
     header_fmt = workbook.add_format({
         'bold': True,
@@ -54,16 +70,28 @@ def write_file(pandas_query, file_name):
         'border': 1})
     # format table header
     for col_num, value in enumerate(pandas_query.columns.values):
-        worksheet.write(4, col_num, value, header_fmt)
+        worksheet.write(first_row, col_num, value, header_fmt)
+        
     # add format for cost
     cost_fmt = workbook.add_format(
         {'num_format': '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)'})
+    worksheet.set_column("F:F", 12, cost_fmt)
+
     # total format
     total_fmt = workbook.add_format(
         {'align': 'right', 'num_format': '$#,##0', 'bold': True, 'bottom': 6})
-    # cost column format
-    worksheet.set_column("F:F", 12, cost_fmt)
+    # Add total row
+    formula = "=SUM({:s}:{:s})".format(first_row, last_row)
+    sum_cell = xl_rowcol_to_cell(first_row-1, cost_col)
+    total_text_cell = xl_rowcol_to_cell(first_row-1, cost_col-1)
+    worksheet.write_formula(sum_cell, formula, total_fmt)
+    worksheet.write_string(total_text_cell, "Total",total_fmt)
     
+    # format date column
+    worksheet.set_column("A:B", 10)
+    
+    # format product info column
+    worksheet.set_column("C:F", 20)
     writer.save()
 
 

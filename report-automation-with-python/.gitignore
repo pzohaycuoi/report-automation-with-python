@@ -1,0 +1,5 @@
+# sensitive information
+.env
+.xlsx
+.csv
+.yaml
