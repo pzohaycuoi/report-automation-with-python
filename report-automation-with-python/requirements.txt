@@ -1,4 +1,0 @@
-pandas
-XlsxWriter
-pyodbc
-azure-storage-file-share

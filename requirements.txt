@@ -1,0 +1,7 @@
+pandas
+XlsxWriter
+pyodbc
+azure-storage-file-share
+python_dotenv
+requests
+openpyxl

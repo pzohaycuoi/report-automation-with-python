@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# drawio
+.drawio
+.drawio*
+
 # C extensions
 *.so
 
@@ -132,7 +136,5 @@ dmypy.json
 .yaml
 
 # excel file
-.xlsx
-.csv
-report-automation-with-python/test.xlsx
-report-automation-with-python/cac.xlsx
+*.xlsx
+*.csv
