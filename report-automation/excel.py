@@ -1,19 +1,22 @@
-import pandas
-import xlsxwriter
 import openpyxl
 
 
-def data_to_excel(excel_file_path, excel_sheet):
+def write_excel(template_file_path, destination_file_path):
     """
-    Export data from sql to excel sheet
+    Insert data from database to excel file with excel template
     """
-    wb = xlsxwriter.Workbook(excel_file_path)
-    wb.add_worksheet('cac')
-    wb.close()
+    def _read_workbook(template_file_path)
+    """
+    Read excel workbook in local host
+    """
+    wb = openpyxl.load_workbook(filename=template_file_path)
+    
+    wb.active = wb[worksheet]
+    ws = wb.active
+    max_row = ws.max_row()
+    return max_row
 
 
-def read_excel(excel_file_path)
-
-
-a = data_to_excel('../Book1.xlsx', 'raw_ri')
-print('cac')
+# TEST #
+a = read_excel('C:/Users/namng/OneDrive/Code/Python/report-automation-with-python/Book1.xlsx', 'raw_ri')
+print(a)

@@ -17,6 +17,7 @@ def connection(conn_str):
         logging.debug(f"Completed Establishing database connection: {conn_str}")
         return conn, cursor
 
+    # TODO error handling
     except pyodbc.Error as err:
         logging.critical(f"{err.args[0]}: {err.args[1]}")
         raise SystemError(err)

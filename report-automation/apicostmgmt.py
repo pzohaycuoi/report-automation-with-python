@@ -25,6 +25,7 @@ def get_enroll_list(token):
         max_retry = 5
         for i in range(max_retry):
             logging.warning(f"API request timed out, retrying after 10s, {max_retry - i} retry left")
+            i += 1
             time.sleep(10)
             req = requests.get(url, headers=headers, verify=True)
             if req != '':
@@ -32,14 +33,17 @@ def get_enroll_list(token):
                 return json.loads(req.text)
 
         logging.critical("API request timed out, no retry left: {errt}")
-        raise requests.exceptions.Timeout
+        raise errt
 
     except requests.exceptions.HTTPError as errh:
-        logging.error(f"Http Error: {errh}")
+        logging.critical(f"Http Error: {errh}")
+        raise errh
 
     except requests.exceptions.ConnectionError as errc:
-        logging.error(f"Error Connecting: {errc}")
+        logging.critical(f"Error Connecting: {errc}")
+        raise errc
 
     except requests.exceptions.RequestException as err:
-        logging.error(f"OOps: Something Else {err}")
+        logging.critical(f"OOps: Something Else {err}")
+        raise err
 
