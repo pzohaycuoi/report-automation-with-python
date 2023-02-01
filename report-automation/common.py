@@ -5,7 +5,8 @@ import os.path
 
 # Set default log configuration file path and log folder
 cur_dir = os.path.dirname(__file__)
-default_log_config = cur_dir + '/../logconfig.ini'
+# default_log_config = cur_dir + '/../logconfig.ini'
+default_log_config = 'C:/Users/namng/OneDrive/Code/Python/report-automation-with-python/logconfig.ini'
 
 
 def logger_config(config_filepath=default_log_config):

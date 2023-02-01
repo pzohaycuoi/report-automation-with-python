@@ -41,7 +41,7 @@ class ReportAutomation():
             else:
                 self.report_month = self.report_month - 1
 
-    def query_usage_data(self, enrollment, ):
+    def query_usage_data(self):
         """
         """
         def _load_env(self):
@@ -110,3 +110,8 @@ class ReportAutomation():
                 logging.info(f'Querying data for enrollment: {enrollment_number} :: {enrollment_name}')
                 for sp in sp_list:
                     data = _exec_stored_procedures(db_cursor, sp, enrollment_number)
+
+load_dotenv()
+a = ReportAutomation
+a.get_enrollment_list(a, api_key=os.getenv('API_KEY'))
+a.query_usage_data(a)

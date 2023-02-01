@@ -1,9 +1,38 @@
 import azure.storage.fileshare as azsfs
-import azure.identity as azid
 from dotenv import load_dotenv
+from os import getenv
+import logging
+import common
 
 
-# TODO implement azure fileshare function
-load_dotenv()
+common.logger_config()
+load_dotenv() # delete after testing
 
-service_credential = azsfs.Servi
+# TODO implement azure fileshare function  
+def fileshare_client(fileshare_connstr, fileshare_name, dir, mode):
+  if mode == 'dir':
+    dir_client = azsfs.ShareDirectoryClient.from_connection_string(conn_str=fileshare_connstr,share_name=fileshare_name,directory_path=dir)
+    return dir_client
+  elif mode == 'file':
+    file_client = azsfs.ShareFileClient.from_connection_string(conn_str=fileshare_connstr,share_name=fileshare_name,directory_path=dir)
+    return file_client
+  else:
+    raise ValueError('Mode is not correct, please choose: "dir" or "file"')
+  
+
+# def create_subdir(dir_client, dir_path, dir_name):
+  # TODO implement logic for this
+
+  
+def download_file(file_client: azsfs.ShareFileClient, dest_file):
+  # TODO download file from azure file share
+  """
+  Download from file from Azure file share
+  """
+  with open(dest_file, "wb") as file_handle:
+    data = file_client.download_file()
+
+
+
+
+file_client = azsfs.ShareDirectoryClient.from_connection_string(conn_str=getenv('SA_CONN_STR'), share_name=getenv('FS_NAME'),directory_path='./')
