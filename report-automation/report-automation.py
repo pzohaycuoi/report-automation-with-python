@@ -18,14 +18,16 @@ class ReportAutomation():
         self.report_month = None
         self.report_year = None
         self.enrollment_active_staus = ('Active', 'Extended')
-        self.enrollment_disable_status = ('Deleted', 'Disabled', 'Expired', 'Transferred', 'Terminated', 'ManuallyTerminated')
-    
+        self.enrollment_disable_status = ('Deleted', 'Disabled', 'Expired',
+                                          'Transferred', 'Terminated',
+                                          'ManuallyTerminated')
+
     def get_enrollment_list(self, api_key):
         """
         Get Azure Enterprise Agreement enrollment number list
         """
         self.enroll_list = apicostmgmt.get_enroll_list(api_key)
-        
+
     def _get_previous_month(self):
             """
             Get previous month includes month and year
@@ -33,12 +35,12 @@ class ReportAutomation():
             today = date.today()
             self.report_year = int(today.strftime("%Y"))
             self.report_month = int(today.strftime("%m"))
-            if month == 1:
-                self.report_year = year - 1
+            if self.report_month == 1:
+                self.report_year = self.report_year - 1
                 self.report_month = 12
             else:
-                self.report_month = month - 1
-    
+                self.report_month = self.report_month - 1
+
     def query_usage_data(self, enrollment, ):
         """
         """
@@ -47,7 +49,7 @@ class ReportAutomation():
             Load environment variables
             """
             load_dotenv()
-                
+
         def _db_connect(self):
             """
             Connect to database
@@ -56,13 +58,14 @@ class ReportAutomation():
             conn, cursor = database.connection('DRIVER='+os.getenv('DB_DRIVER')+';SERVER=tcp:'+os.getenv('DB_ADDR')+';PORT=1433;DATABASE='+os.getenv('DB_NAME')+';UID='+os.getenv('DB_USER')+';PWD='+ os.getenv('DB_USER_PWD'))
             # TODO ERROR HANDLING
             return conn, cursor
-        
-        def _exec_stored_procedures(cursor, stored_procedure, enrollment_number):
+
+        def _exec_stored_procedures(cursor, stored_procedure,
+                                    enrollment_number):
             """
             Exectute SQL stored procedure to get the data
             Must execute after _get_previous_month
             """
-            if enrollment_number is None or enrollment_number is '':
+            if enrollment_number is None or enrollment_number == '':
                 logging.error('Enrollment Number is not provided')
                 return False
             if self.report_month is None or self.report_year is None:
@@ -79,21 +82,24 @@ class ReportAutomation():
                         logging.info(f"Success: Got report month is {self.report_month} and year is {self.report_year}")
                         continue
                     time.sleep(1)
-            
+
             logging.info(f'Executing stored procedure {stored_procedure} for enrollment: {enrollment_number} :: {enrollment_name}')
             params = f"'@EnrollmentNumber={enrollment_number}','@year={self.report_year}','@month={self.report_month}'"
-            data = database.exec_stored_procedure(cursor, stored_procedure, params)
+            data = database.exec_stored_procedure(cursor,
+                                                  stored_procedure, params)
             return data
-        
-        
+
         logging.info('Initialize environment variables')
         _load_env()
         logging.info('Connecting to database')
         db_conn, db_cursor = _db_connect()
         ReportAutomation._get_previous_month()
         logging.info(f'Report month: {self.report_month}-{self.report_year}')
-        sp_list = ("proc_data_report_ea", "proc_data_ri_report_ea", "proc_data_balance_summary_report_ea", "proc_data_marketplace_report_ea")
-        
+        sp_list = ("proc_data_report_ea",
+                   "proc_data_ri_report_ea",
+                   "proc_data_balance_summary_report_ea",
+                   "proc_data_marketplace_report_ea")
+
         for enrollment in self.enroll_list:
             # TODO CHECK JSON IF EMPTY
             enrollment_number = enrollment['name']

@@ -46,4 +46,3 @@ def get_enroll_list(token):
     except requests.exceptions.RequestException as err:
         logging.critical(f"OOps: Something Else {err}")
         raise err
-
