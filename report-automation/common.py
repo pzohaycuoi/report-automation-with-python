@@ -24,3 +24,12 @@ def logger_config(config_filepath=default_log_config):
             print(ex)
             print(f"Error in Logging Configuration. Using default configs: {default_log_config}")
             logging.config.fileConfig(default_log_config)
+
+
+def log_function_call(func):
+    def wrapper(*args, **kwargs):
+        logging.debug(f"Calling function {func.__name__} with args {args} and kwargs {kwargs}")
+        result = func(*args, **kwargs)
+        logging.debug(f"Function {func.__name__} returned {result}")
+        return result
+    return wrapper

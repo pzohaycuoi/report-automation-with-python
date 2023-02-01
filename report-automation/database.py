@@ -6,41 +6,46 @@ import common
 common.logger_config()
 
 
+@common.log_function_call
 def connection(conn_str):
     """
     Establish connection to the database
     """
+    # TODO error handling
     try:
-        logging.debug(f"Establishing database connection: {conn_str}")
         conn = pyodbc.connect(conn_str)
         cursor = conn.cursor()
-        logging.debug(f"Completed Establishing database connection: {conn_str}")
         return conn, cursor
-
-    # TODO error handling
     except pyodbc.Error as err:
         logging.critical(f"{err.args[0]}: {err.args[1]}")
         raise SystemError(err)
 
 
+@common.log_function_call
 def exec_stored_procedure(cursor: pyodbc.Cursor, stored_procedure, *args):
     """
     Execute SQL stored procedures
     """
     try:
         query = f"exec {stored_procedure} {args[0]},{args[1]},{args[2]}"
-        logging.debug(f"Executing stored procedure: {query}")
-        cursor.execute(f"exec {stored_procedure} {args[0]},{args[1]},{args[2]}")
-        logging.debug(f"Completed Executing stored procedure: {stored_procedure}")
-        logging.debug(f"Fetching data")
+        cursor.execute(query)
         data = cursor.fetchall()
         if data == '' or data is None or data == []:
-            logging.warning('This enrollment does not have data in database')
-        else:
-            logging.debug(f"Completed fetching data")
-
+            logging.warning(f'This enrollment {args[0]} does not have data in database')
         return cursor, data
-
     except pyodbc.Error as err:
         logging.critical(f"{err.args[0]}: {err.args[1]}")
         raise SystemError(err)
+
+
+if __name__ == '__main__':
+    from dotenv import load_dotenv
+    from os import getenv
+
+    load_dotenv()
+    db_conn_str = 'DRIVER='+getenv('DB_DRIVER')+';SERVER=tcp:'+getenv('DB_ADDR')+';PORT=1433;DATABASE='+getenv('DB_NAME')+';UID='+getenv('DB_USER')+';PWD='+ getenv('DB_USER_PWD')
+    db_conn, db_cursor = connection(db_conn_str)
+    params = "'@EnrollmentNumber=50902749','@year=2022','@month=12'"
+    sp = 'proc_data_report_ea'
+    data = exec_stored_procedure(db_cursor, sp, params)
+    print(data)

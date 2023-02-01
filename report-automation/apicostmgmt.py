@@ -8,6 +8,7 @@ import json
 common.logger_config()
 
 
+@common.log_function_call
 def get_enroll_list(token):
     """
     Get list of Azure enterprise agreement's enrollment
@@ -15,12 +16,9 @@ def get_enroll_list(token):
     headers = {"Content-Type": "application/json", "Authorization": f"bearer {token}"}
     url = 'https://management.azure.com/providers/Microsoft.Billing/billingAccounts/?api-version=2019-10-01-preview'
     try:
-        logging.debug(f"Invoking API request to {url}")
         req = requests.get(url, headers=headers, verify=True)
         req.raise_for_status()
-        logging.debug(f"Completed API request to {url}")
         return json.loads(req.text)
-
     except requests.exceptions.Timeout as errt:
         max_retry = 5
         for i in range(max_retry):
@@ -29,20 +27,24 @@ def get_enroll_list(token):
             time.sleep(10)
             req = requests.get(url, headers=headers, verify=True)
             if req != '':
-                logging.debug(f"Completed API request to {url}")
                 return json.loads(req.text)
-
         logging.critical("API request timed out, no retry left: {errt}")
         raise errt
-
     except requests.exceptions.HTTPError as errh:
+        # TODO if error response code 401 400 then have to renew the API token
         logging.critical(f"Http Error: {errh}")
         raise errh
-
     except requests.exceptions.ConnectionError as errc:
         logging.critical(f"Error Connecting: {errc}")
         raise errc
-
     except requests.exceptions.RequestException as err:
         logging.critical(f"OOps: Something Else {err}")
         raise err
+
+
+if __name__ == '__main__':
+    from dotenv import load_dotenv
+    from os import getenv
+
+    load_dotenv()
+    get_enroll_list(getenv('API_KEY'))
