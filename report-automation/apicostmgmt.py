@@ -8,7 +8,7 @@ import json
 common.logger_config()
 
 
-@common.log_function_call
+# @common.log_function_call
 def get_enroll_list(token):
     """
     Get list of Azure enterprise agreement's enrollment

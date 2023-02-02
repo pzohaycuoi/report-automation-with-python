@@ -1,6 +1,8 @@
 import logging
 import logging.config
 import os.path
+import time
+import inspect
 
 
 # Set default log configuration file path and log folder
@@ -28,8 +30,12 @@ def logger_config(config_filepath=default_log_config):
 
 def log_function_call(func):
     def wrapper(*args, **kwargs):
-        logging.debug(f"Calling function {func.__name__} with args {args} and kwargs {kwargs}")
+        file_path = inspect.getfile(func)
+        file_name = os.path.basename(file_path)
+        logging.debug(f"Calling function {func.__name__} - {file_name} with args {args} and kwargs {kwargs}")
+        start_time = time.time()
         result = func(*args, **kwargs)
-        logging.debug(f"Function {func.__name__} returned {result}")
+        end_time = time.time()
+        logging.debug(f"Function {func.__name__} - {file_name} returned {result}, for {end_time-start_time} seconds")
         return result
     return wrapper

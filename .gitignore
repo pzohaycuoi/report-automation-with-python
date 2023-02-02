@@ -138,3 +138,9 @@ dmypy.json
 # excel file
 *.xlsx
 *.csv
+
+# log folder
+logs/*
+
+# temp folder
+temp/*
