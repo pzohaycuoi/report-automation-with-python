@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     load_dotenv()
     db_conn_str = 'DRIVER='+getenv('DB_DRIVER')+';SERVER=tcp:'+getenv('DB_ADDR')+';PORT=1433;DATABASE='+getenv('DB_NAME')+';UID='+getenv('DB_USER')+';PWD='+ getenv('DB_USER_PWD')
-    db_conn, db_cursor = connection(db_conn_str)
+    db_cursor = connection(db_conn_str)
     params = "@EnrollmentNumber=50902749,@year=2022,@month=12"
     sp = 'proc_data_report_ea'
     data = exec_stored_procedure(db_cursor, sp, params)
