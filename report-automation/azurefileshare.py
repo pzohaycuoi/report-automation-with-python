@@ -37,9 +37,7 @@ def download_file(file_client: ShareFileClient, dest_file):
     Download from file from Azure file share
     """
     with open(dest_file, "wb") as file_handle:
-    data = file_client.download_file()
-
-
+        data = file_client.download_file()
 
 
 file_client = azsfs.ShareDirectoryClient.from_connection_string(conn_str=getenv('SA_CONN_STR'), share_name=getenv('FS_NAME'),directory_path='./')

@@ -1,7 +1,6 @@
 import openpyxl
 import os
 import common
-import xlsxwriter
 import logging
 
 
@@ -54,7 +53,7 @@ def write_excel(workbook, template_file_path, data, worksheet, table_name):
         for i, row_data in enumerate(data, start=start_row):
             for j, value in enumerate(row_data):
                 worksheet.cell(row=i, column=j+1, value=value)
-        
+
     @common.log_function_call
     def _colnum_string(col_max):
         """
@@ -65,7 +64,7 @@ def write_excel(workbook, template_file_path, data, worksheet, table_name):
             col_max, remainder = divmod(col_max - 1, 26)
             string = chr(65 + remainder) + string
         return string
-    
+
     @common.log_function_call
     def _update_table_ref(worksheet, table_name):
         try:
@@ -73,11 +72,11 @@ def write_excel(workbook, template_file_path, data, worksheet, table_name):
             max_col = _colnum_string(worksheet.max_column)
             max_row = worksheet.max_row
             if max_row == 1:
-                table.ref = f'A1:{max_col}2'    
-            table.ref = f'A1:{max_col}{max_row}'
+                table.ref = f'A1:{max_col}2'
+            else:
+                table.ref = f'A1:{max_col}{max_row}'
         except KeyError:
             logging.warning(f'Worksheet {worksheet} does not contain table {table_name}')
-            
 
     ws = _load_worksheet(workbook, worksheet)
     _cleanup_worksheet(ws)
@@ -94,7 +93,7 @@ def refresh_pivot_table(workbook):
         if worksheet._pivots != []:
             for pivot_tbl in worksheet._pivots:
                 pivot_tbl.cache.refreshOnLoad = True
-                
+
 
 @common.log_function_call
 def save_workbook(workbook, destination_file_path):

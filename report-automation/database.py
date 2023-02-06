@@ -21,7 +21,7 @@ def connection(conn_str):
         raise SystemError(err)
 
 
-# @common.log_function_call
+@common.log_function_call
 def exec_stored_procedure(cursor: pyodbc.Cursor, stored_procedure, *args):
     """
     Execute SQL stored procedures
