@@ -31,7 +31,9 @@ def exec_stored_procedure(cursor: pyodbc.Cursor, stored_procedure, *args):
         cursor.execute(query)
         data = cursor.fetchall()
         if data == '' or data is None or data == []:
-            logging.warning(f'This enrollment {args[0]} does not have data in database')
+            logging.info(f'This enrollment {args[0]} does not have data in database')
+        else:
+            logging.info(f'This enrollment {args[0]} have data in database')
         return data
     except pyodbc.Error as err:
         logging.critical(f"{err.args[0]}: {err.args[1]}")
