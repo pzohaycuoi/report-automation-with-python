@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from os import getenv
 import logging
 import common
+from datetime import datetime
+from os import path
 
 
 common.logger_config()
@@ -32,35 +34,14 @@ def fileshare_client(fileshare_connstr, fileshare_name, dir, mode, file_path='')
             logging.critical(TypeError)
     else:
         raise ValueError('Mode is not correct, please choose: "dir" or "file"')
-              
-    def create_subdir(dir_client, dir_path):
-        """
-        Create sub directory in azure file share
-        """
-        path_split = dir_path.split()
-        path_combine = ''
-        for dir in path_split:
-            if dir == '.':
-                path_combine = f"{dir}/"
-                continue
-                dir_client.create_subdirectory(path_combine)
-        
-    @common.log_function_call
-    def _download_file(file_client: ShareFileClient, dest_file):
-        # TODO download file from azure file share
-        """
-        Download from file from Azure file share
-        """
-        with open(dest_file, "wb") as file_handle:
-            data = file_client.download_file()
-            
+    
+@common.log_function_call
 def create_subdir(dir_client, dir_path):
     """
     Create sub directory in azure file share
     """
-    path_split = dir_path.split()
     path_combine = ''
-    for dir in path_split:
+    for dir in dir_path.split():
         path_combine += f"{dir}/"
         if dir == '.':
             continue
@@ -68,16 +49,54 @@ def create_subdir(dir_client, dir_path):
             dir_client.create_subdirectory(path_combine)
         except ResourceExistsError as err:
             if err.status_code == '409':
-                logging.info(err.message)
+                logging.warning(err.message)
                 continue
+    return True
+    
+@common.log_function_call
+def download_file(dir_client: ShareDirectoryClient, cloud_source_file, local_dest_file):
+    """
+    Download from file from Azure file share
+    """
+    # TODO: check if file exist for download
+    dest_path = common.check_path_exist(local_dest_file, generate_file_name=True)
+    try:
+        with open(cloud_source_file, "wb") as file_handle:
+            data = dir_client.download_file()
+            data.readinto(dest_path)
+        return dest_path
+    except Exception as err:
+        logging.critical(err)
+        return ''
+
+@common.log_function_call
+def upload_file(dir_client: ShareDirectoryClient, cloud_dest_file, local_source_file):
+    """
+    Upload local file to AzureFileShare
+    """
+    # Check subdir existence, if not create them
+    dest_path_parts = path.split(cloud_dest_file)
+    create_subdir(dir_client, dest_path_parts[0])
+    # Upload the file to destination
+    file_client = dir_client.create_file(cloud_dest_file)
+    with open(local_source_file, "rb") as data:
+        try:
+            file_client.upload_file(data)
+            return cloud_dest_file
+        except ResourceExistsError as err:
+            if err.status_code == '409':
+                logging.warning(err.message)
+                # Rename the file with timestamp appended
+                new_cloud_dest_file = common.generate_file_name(cloud_dest_file)
+                file_client = dir_client.create_file(new_cloud_dest_file)
+                file_client.upload_file(data)
+                return new_cloud_dest_file
             
 
 if __name__ == '__main__':
     load_dotenv()
     dir_client = fileshare_client(getenv('SA_CONN_STR'), getenv('FS_NAME'), dir='./', 
                                   mode='dir')
-    file_client = fileshare_client(getenv('SA_CONN_STR'), getenv('FS_NAME'), dir='./', 
-                                  mode='file', file_path='./bet-da-bong.xlsx')
     dir_path = './hihi2/aaa/cac'
     a = create_subdir(dir_client, dir_path)
     print('cac')

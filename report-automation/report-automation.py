@@ -6,6 +6,7 @@ import apicostmgmt
 import os
 from datetime import date
 import excel
+import azurefileshare
 
 
 # Setup logging
@@ -74,6 +75,23 @@ class ReportAutomation:
         params = f"@EnrollmentNumber={enrollment_number},@year={self.report_year},@month={self.report_month}"
         data = database.exec_stored_procedure(cursor, stored_procedure, params)
         return data
+        
+    @common.log_function_call
+    def _create_fileshare_client(self):
+        """
+        
+        """
+        file_client = azurefileshare.fileshare_client(os.getenv('SA_CONN_STR'), 
+                                                      os.getenv('FS_NAME'), dir='./', 
+                                                      mode='dir')
+        return file_client
+    
+    def _create_report_dir(self, dir_client, report_type, customer_name, enrollment_number):
+        """
+        
+        """
+        dir_path = f"{report_type}/{customer_name}/{enrollment_number}/{ReportAutomation.}"
+        
 
     @common.log_function_call
     def get_usage_enroll(self, template_file, db_cursor, enrollment_number):
@@ -144,7 +162,7 @@ class ReportAutomation:
         for enrollment in self.enroll_list:
             try:
                 enrollment_number = enrollment['name']
-                # enrollment_name = enrollment['properties']['displayName']
+                enrollment_name = enrollment['properties']['displayName']
                 enrollment_status = enrollment['properties']['accountStatus']
             except IndexError:
                 raise IndexError

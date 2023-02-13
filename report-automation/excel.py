@@ -1,5 +1,4 @@
 import openpyxl
-import os
 import common
 import logging
 
@@ -13,12 +12,8 @@ def load_excel(template_file_path):
     Load excel workbook in local host
     """
     default_template_path = 'C:/Users/namng/OneDrive/Code/Python/report-automation-with-python/template/Book1.xlsx'
-    if not os.path.exists(template_file_path):
-        if os.path.exists(default_template_path):
-            wb = openpyxl.load_workbook(default_template_path)
-        else:
-            raise ValueError(f'{template_file_path} not exist')
-    wb = openpyxl.load_workbook(filename=template_file_path)
+    wb = openpyxl.load_workbook(filename=template_file_path or
+                                default_template_path)
     return wb
 
 
