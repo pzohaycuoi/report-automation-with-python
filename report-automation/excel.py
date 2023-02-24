@@ -11,9 +11,10 @@ def load_excel(template_file_path):
     """
     Load excel workbook in local host
     """
-    default_template_path = 'C:/Users/namng/OneDrive/Code/Python/report-automation-with-python/template/Book1.xlsx'
-    wb = openpyxl.load_workbook(filename=template_file_path or
-                                default_template_path)
+    # convert to real path
+    real_path = common._convert_to_realpath(template_file_path)
+    default_template_path = common._convert_to_realpath('../template/Book1.xlsx')
+    wb = openpyxl.load_workbook(filename=real_path or default_template_path)
     return wb
 
 
@@ -95,12 +96,14 @@ def save_workbook(workbook, destination_file_path):
     """
     Save the workbook to new destination
     """
-    workbook.save(destination_file_path)
+    # Get real path
+    real_path = common._convert_to_realpath(destination_file_path)
+    workbook.save(real_path)
 
 
 if __name__ == '__main__':
-    template_file = 'C:/Users/namng/OneDrive/Code/Python/report-automation-with-python/template/Book1.xlsx'
-    destination_file = ('C:/Users/namng/OneDrive/Code/Python/report-automation-with-python/template/Book2.xlsx')
+    template_file = '../template/Book1.xlsx'
+    destination_file = ('../template/Book2.xlsx')
     wb = load_excel(template_file)
     refresh_pivot_table(wb)
     save_workbook(wb, destination_file)

@@ -7,6 +7,7 @@ import os
 from datetime import date
 import excel
 import azurefileshare
+from azure.storage.fileshare import ShareDirectoryClient
 
 
 # Setup logging
@@ -22,6 +23,10 @@ class ReportAutomation:
         self.enrollment_disable_status = ('Deleted', 'Disabled', 'Expired',
                                           'Transferred', 'Terminated',
                                           'ManuallyTerminated')
+        self.report_template_path = ''
+        self.local_report_path = ''
+        self.cloud_report_path = ''
+        self.azure_fileshare_client = ShareDirectoryClient
 
     @common.log_function_call
     def _get_enrollment_list(self):
@@ -79,19 +84,31 @@ class ReportAutomation:
     @common.log_function_call
     def _create_fileshare_client(self):
         """
-        
+        Establish Azure file share directory client
         """
-        file_client = azurefileshare.fileshare_client(os.getenv('SA_CONN_STR'), 
-                                                      os.getenv('FS_NAME'), dir='./', 
+        file_client = azurefileshare.fileshare_client(os.getenv('SA_CONN_STR'),
+                                                      os.getenv('FS_NAME'),
+                                                      dir='./',
                                                       mode='dir')
+        self.azure_fileshare_client = file_client
         return file_client
+        
+    @common.log_function_call
+    def _download_template(self):
+        """
+        Download report template inside Azure Fileshare
+        """
+        # TODO: implement this
+        
     
-    def _create_report_dir(self, dir_client, report_type, customer_name, enrollment_number):
+    @common.log_function_call
+    def _upload_report(self, dir_client, report_type, customer_name, enrollment_number):
         """
-        
+        Upload report from source folder to Azure file share with dir pattern
         """
-        dir_path = f"{report_type}/{customer_name}/{enrollment_number}/{ReportAutomation.}"
-        
+        cloud_dir_path = f"./{report_type}/{customer_name}/{enrollment_number}/{self.report_year}/{self.report_month}/"
+        azurefileshare.upload_file(dir_client, cloud_dir_path, self.local_report_path)
+        self.cloud_report_path = cloud_dir_path
 
     @common.log_function_call
     def get_usage_enroll(self, template_file, db_cursor, enrollment_number):
@@ -146,19 +163,23 @@ class ReportAutomation:
                 excel.write_excel(wb, template_file, data, ws_name,
                                   tbl_name)
             file_name = f'{enrollment_number}-report.xlsx'
-            destination_path = f'C:/Users/namng/OneDrive/Code/Python/report-automation-with-python/temp/{file_name}'
+            local_dest_path =f'../temp/{file_name}'
             excel.refresh_pivot_table(wb)
-            excel.save_workbook(wb, destination_path)
+            excel.save_workbook(wb, local_dest_path)
+            self.local_report_path = local_dest_path
 
     @common.log_function_call
-    def get_usage_all_enroll(self):
+    def get_ea_report(self):
         """
         Query the usage data for all enrollment
         """
         db_cursor = ReportAutomation._db_connect(self)
         ReportAutomation._get_enrollment_list(self)
         # TODO CHECK JSON IF EMPTY
-        template_file = 'C:/Users/namng/OneDrive/Code/Python/report-automation-with-python/template/Book1.xlsx'
+        fileshare_dir_client = ReportAutomation._create_fileshare_client(self)
+        
+        template_file = azurefileshare.download_file()
+        ReportAutomation._create_fileshare_client(self)
         for enrollment in self.enroll_list:
             try:
                 enrollment_number = enrollment['name']
@@ -172,6 +193,9 @@ class ReportAutomation:
                 ReportAutomation.get_usage_enroll(self, template_file,
                                                   db_cursor,
                                                   enrollment_number)
+                ReportAutomation._upload_report(self, fileshare_dir_client, "EA", enrollment_name,
+                                                enrollment_number)
+                
 
 
 if __name__ == "__main__":

@@ -42,6 +42,33 @@ def log_function_call(func):
     return wrapper
 
 
+def get_real_path(func):
+    """
+    Decorator for function/method that return path for local
+    Convert path to absolute path of the workspace
+    """
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        real_path = _convert_to_realpath(result)
+        return real_path
+    return wrapper
+
+
+def _convert_to_realpath(path):
+    """
+    Get the current workspace should be inside the report-automation folder
+    Convert the path in arg to absolute path with relative path appended
+    So path using relative path should be working normally
+    """
+    workspace_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    if workspace_dir not in path:
+        current_path = (os.path.dirname(os.path.realpath(__file__)))
+        real_path = os.path.join(current_path, path)
+        return real_path
+    else:
+        return path
+
+
 @log_function_call
 def generate_file_name(file_path):
     """
@@ -50,7 +77,6 @@ def generate_file_name(file_path):
     Else if arg is a file name, return only new file name
     """
     if len(os.path.split(file_path)) > 1:
-        file_name == '' and file_path != '':
         path_parts = os.path.split(file_path)
         dir_path = path_parts[0]
         file_name = path_parts[1]
@@ -67,21 +93,26 @@ def generate_file_name(file_path):
 
 
 @log_function_call
-def check_path_exist(path, generate_file_name=bool):
+def check_path_exist(path, avoid_duplicate:bool = False):
     """
     Check path existence
-    mode = False: Check path existence only, return bool for result
-    mode = True: Check path existence for file path, generate new file path with
+    avoid_duplicate = False: Check path existence only, return bool for result
+    avoid_duplicate = True: Check path existence for file path, generate new file path with
     timestamp in filename part, return new path
     """
-    if path.exists(path):
-        if generate_file_name is True:
-            new_path = generate_file_name(path)    
+    workspace_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    if workspace_dir not in path:
+        real_path = _convert_to_realpath(path)
+    else:
+        real_path = path
+    if os.path.exists(real_path):
+        if avoid_duplicate is True:
+            new_path = generate_file_name(real_path)    
             return new_path
-        elif generate_file_name is False:
+        elif avoid_duplicate is False:
             return True
     else:
-        if generate_file_name is True:
-            return path
-        elif generate_file_name is False:
+        if avoid_duplicate is True:
+            return real_path
+        elif avoid_duplicate is False:
             return False
