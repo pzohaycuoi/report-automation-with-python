@@ -55,6 +55,7 @@ class ReportAutomation:
         return {'report_year': year,
                 'report_month': month}
 
+
     @common.log_function_call
     def _db_connect(self):
         """
@@ -115,14 +116,14 @@ class ReportAutomation:
         """
         Query the usage data of an Enrollment
         """
-        sp_list = {'proc_data_report_ea': 'raw_usage',
+        sp_list = ('proc_data_report_ea': 'raw_usage',
                    'proc_data_ri_report_ea': 'raw_ri',
                    'proc_data_balance_summary_report_ea': 'BalanceSummary',
-                   'proc_data_marketplace_report_ea': 'raw_marketplace'}
-        tbl_list = {'raw_usage': 'raw_usage',
+                   'proc_data_marketplace_report_ea': 'raw_marketplace')
+        tbl_list = ('raw_usage': 'raw_usage',
                     'raw_ri': 'raw_ri',
                     'BalanceSummary': 'BalanceSummary',
-                    'raw_marketplace': 'raw_marketplace'}
+                    'raw_marketplace': 'raw_marketplace')
         wb = excel.load_excel(template_file)
         data_dict = {}
         for sp in sp_list:
@@ -187,18 +188,17 @@ class ReportAutomation:
                 enrollment_status = enrollment['properties']['accountStatus']
             except IndexError:
                 raise IndexError
-            logging.info(f'enrollment {enrollment_number} status is:'
-                         + f' {enrollment_status}')
+            logging.info(f'enrollment {enrollment_number} status is: {enrollment_status}')
             if enrollment_status not in self.enrollment_disable_status:
                 ReportAutomation.get_usage_enroll(self, template_file,
                                                   db_cursor,
                                                   enrollment_number)
                 ReportAutomation._upload_report(self, fileshare_dir_client, "EA", enrollment_name,
                                                 enrollment_number)
-                
 
 
 if __name__ == "__main__":
+    /..,m
     load_dotenv()
     a = ReportAutomation()
     a.get_usage_all_enroll()
