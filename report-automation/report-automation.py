@@ -198,7 +198,6 @@ class ReportAutomation:
 
 
 if __name__ == "__main__":
-    /..,m
     load_dotenv()
     a = ReportAutomation()
     a.get_usage_all_enroll()
