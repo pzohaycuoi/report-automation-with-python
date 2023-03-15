@@ -18,26 +18,33 @@ def logger_config(config_filepath=default_log_config):
     """
     # check if provided file path exist
     if not os.path.exists(config_filepath):
-        print(f"{config_filepath} not exist. Using default configs: {default_log_config}")
+        print(
+            f"{config_filepath} not exist. Using default configs: {default_log_config}")
         logging.config.fileConfig(default_log_config)
     else:
         try:
             logging.config.fileConfig(config_filepath)
         except Exception as ex:
             print(ex)
-            print(f"Error in Logging Configuration. Using default configs: {default_log_config}")
+            print(
+                f"Error in Logging Configuration. Using default configs: {default_log_config}")
             logging.config.fileConfig(default_log_config)
 
 
 def log_function_call(func):
+    """
+    Decorator for debugging
+    """
     def wrapper(*args, **kwargs):
         file_path = inspect.getfile(func)
         file_name = os.path.basename(file_path)
-        logging.debug(f"Calling function {func.__name__} - {file_name}")
+        logging.debug('%s - %s', func.__name__, file_name)
+
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
-        logging.debug(f"Function {func.__name__} - {file_name},run for {end_time-start_time} seconds")
+        logging.debug('%s - %s - %s', func.__name__, file_name,
+                      end_time-start_time)
         return result
     return wrapper
 
@@ -49,18 +56,19 @@ def get_real_path(func):
     """
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
-        real_path = _convert_to_realpath(result)
+        real_path = convert_to_realpath(result)
         return real_path
     return wrapper
 
 
-def _convert_to_realpath(path):
+def convert_to_realpath(path):
     """
     Get the current workspace should be inside the report-automation folder
     Convert the path in arg to absolute path with relative path appended
     So path using relative path should be working normally
     """
-    workspace_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    workspace_dir = os.path.dirname(
+        os.path.dirname(os.path.realpath(__file__)))
     if workspace_dir not in path:
         current_path = (os.path.dirname(os.path.realpath(__file__)))
         real_path = os.path.join(current_path, path)
@@ -93,26 +101,31 @@ def generate_file_name(file_path):
 
 
 @log_function_call
-def check_path_exist(path, avoid_duplicate:bool = False):
+def check_path_exist(path, avoid_duplicate: bool = False):
     """
     Check path existence
     avoid_duplicate = False: Check path existence only, return bool for result
     avoid_duplicate = True: Check path existence for file path, generate new file path with
     timestamp in filename part, return new path
     """
-    workspace_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    workspace_dir = os.path.dirname(
+        os.path.dirname(os.path.realpath(__file__)))
+
     if workspace_dir not in path:
-        real_path = _convert_to_realpath(path)
+        real_path = convert_to_realpath(path)
     else:
         real_path = path
+
     if os.path.exists(real_path):
         if avoid_duplicate is True:
-            new_path = generate_file_name(real_path)    
+            new_path = generate_file_name(real_path)
             return new_path
-        elif avoid_duplicate is False:
+
+        if avoid_duplicate is False:
             return True
     else:
         if avoid_duplicate is True:
             return real_path
-        elif avoid_duplicate is False:
+
+        if avoid_duplicate is False:
             return False

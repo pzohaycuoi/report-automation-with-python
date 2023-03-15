@@ -146,11 +146,11 @@ class ReportAutomation:
             try:
                 if data_dict[tbl] == []:
                     count_tbl_without_data += 1
-            except IndexError:
+            except IndexError:  # Index Error = Table not exist > count increase
                 logging.critical(IndexError)
-                raise IndexError
+                count_tbl_without_data += 1
 
-        if count_tbl_without_data != len(tbl_list):
+        if count_tbl_without_data != len(tbl_list):  # 
             for ws_name in data_dict:
                 try:
                     if data_dict[ws_name] == []:
@@ -163,8 +163,9 @@ class ReportAutomation:
                 data = data_dict[ws_name]
                 excel.write_excel(wb, template_file, data, ws_name,
                                   tbl_name)
+
             file_name = f'{enrollment_number}-report.xlsx'
-            local_dest_path =f'../temp/{file_name}'
+            local_dest_path =f'../temp/{file_name}' # USE COMMON FUNCTION REAL PATH FOR CONSISTENCE PATH
             excel.refresh_pivot_table(wb)
             excel.save_workbook(wb, local_dest_path)
             self.local_report_path = local_dest_path

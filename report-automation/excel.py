@@ -1,6 +1,6 @@
+import logging
 import openpyxl
 import common
-import logging
 
 
 common.logger_config()
@@ -12,14 +12,15 @@ def load_excel(template_file_path):
     Load excel workbook in local host
     """
     # convert to real path
-    real_path = common._convert_to_realpath(template_file_path)
-    default_template_path = common._convert_to_realpath('../template/Book1.xlsx')
+    real_path = common.convert_to_realpath(template_file_path)
+    default_template_path = common.convert_to_realpath(
+        '../template/Book1.xlsx')
     wb = openpyxl.load_workbook(filename=real_path or default_template_path)
     return wb
 
 
 @common.log_function_call
-def write_excel(workbook, template_file_path, data, worksheet, table_name):
+def write_excel(workbook, data, worksheet, table_name):
     """
     Insert data from database to excel file with excel template
     """
@@ -67,12 +68,17 @@ def write_excel(workbook, template_file_path, data, worksheet, table_name):
             table = worksheet.tables[table_name]
             max_col = _colnum_string(worksheet.max_column)
             max_row = worksheet.max_row
+
+            # If max row is 1 then set to table ref to 2
+            # For better visualization
             if max_row == 1:
                 table.ref = f'A1:{max_col}2'
             else:
                 table.ref = f'A1:{max_col}{max_row}'
+
         except KeyError:
-            logging.warning(f'Worksheet {worksheet} does not contain table {table_name}')
+            logging.warning('Worksheet %s does not contain table %s',
+                            worksheet, table_name)
 
     ws = _load_worksheet(workbook, worksheet)
     _cleanup_worksheet(ws)
@@ -97,7 +103,7 @@ def save_workbook(workbook, destination_file_path):
     Save the workbook to new destination
     """
     # Get real path
-    real_path = common._convert_to_realpath(destination_file_path)
+    real_path = common.convert_to_realpath(destination_file_path)
     workbook.save(real_path)
 
 
