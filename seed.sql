@@ -1,6 +1,3 @@
-TODO: Add ea_price_sheet: meter_id - primary key
-TODO: Add ea_detail_usage: meter_id - foreign key
-
 -- 🔥 Table: ea_report_date
 CREATE TABLE db_billing_report.ea_report_date
 (
@@ -86,7 +83,7 @@ CREATE TABLE db_billing_report.ea_ri_charges
   amount numeric(10, 2),
   currency varchar(10),
   billing_frequency varchar(20),
-  CONSTRAINT PK_ea_ri_charges PRIMARY KEY (reservation_order_name),
+  CONSTRAINT PK_ea_ri_charges PRIMARY KEY (reservation_order_name, enrollment_number, date),
   CONSTRAINT FK_ea_ri_charges_ea_report_date FOREIGN KEY (date)
     REFERENCES db_billing_report.ea_report_date (date),
   CONSTRAINT FK_ea_ri_charges_ea_accounts FOREIGN KEY (enrollment_number)
@@ -96,11 +93,10 @@ CREATE TABLE db_billing_report.ea_ri_charges
 -- 🔥 Table: ea_price_sheet
 CREATE TABLE db_billing_report.ea_price_sheet
 (
-  id int NOT NULL,
   enrollment_number int NOT NULL,
-  date varchar(8),
+  date varchar(8) NOT NULL,
+  meter_id varchar(50) NOT NULL,
   billing_period_id int,
-  meter_id int,
   unit_of_measure varchar(50),
   included_quantity numeric(10, 2),
   part_number varchar(20),
@@ -113,7 +109,7 @@ CREATE TABLE db_billing_report.ea_price_sheet
   meter_location varchar(max),
   total_included_quantity numeric(10, 2),
   pretax_standard_rate numeric(10, 2),
-  CONSTRAINT PK_ea_price_sheet PRIMARY KEY (id),
+  CONSTRAINT PK_ea_price_sheet PRIMARY KEY (enrollment_number, date, meter_id),
   CONSTRAINT FK_ea_price_sheet_ea_report_date FOREIGN KEY (date)
     REFERENCES db_billing_report.ea_report_date (date),
   CONSTRAINT FK_ea_price_sheet_ea_accounts FOREIGN KEY (enrollment_number)
@@ -123,9 +119,9 @@ CREATE TABLE db_billing_report.ea_price_sheet
 -- 🔥 Table: ea_detail_usage
 CREATE TABLE db_billing_report.ea_detail_usage
 (
-  id int NOT NULL,
   enrollment_number int NOT NULL,
-  date varchar(8),
+  date varchar(8) NOT NULL,
+  meter_id varchar(50) NOT NULL,
   is_azure_credit_eligible bit,
   cost numeric(10, 2),
   consumed_service varchar(30),
@@ -134,7 +130,6 @@ CREATE TABLE db_billing_report.ea_detail_usage
   account_name varchar(50),
   subscription_id varchar(50),
   subscription_name varchar(50),
-  meter_id varchar(50),
   quantity numeric(10, 2),
   effective_price numeric(10, 2),
   resource_location varchar(20),
@@ -147,9 +142,11 @@ CREATE TABLE db_billing_report.ea_detail_usage
   publisher_name varchar(100),
   tags nvarchar(max),
   additional_info nvarchar(max),
-  CONSTRAINT PK_ea_detail_usage PRIMARY KEY (id),
+  CONSTRAINT PK_ea_detail_usage PRIMARY KEY (enrollment_number, date, meter_id),
   CONSTRAINT FK_ea_detail_usage_ea_report_date FOREIGN KEY (date)
     REFERENCES db_billing_report.ea_report_date (date),
   CONSTRAINT FK_ea_detail_usage_ea_accounts FOREIGN KEY (enrollment_number)
-    REFERENCES db_billing_report.ea_accounts (enrollment_number)
+    REFERENCES db_billing_report.ea_accounts (enrollment_number),
+  -- CONSTRAINT FK_ea_detail_usage_ea_price_sheet FOREIGN KEY (meter_id)
+  --   REFERENCES db_billing_report.ea_price_sheet (meter_id)
 );
