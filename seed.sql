@@ -1,17 +1,3 @@
--- 🔥 Table: ea_report_date
-CREATE TABLE db_billing_report.ea_report_date
-(
-  date varchar(8) NOT NULL,
-  day int,
-  month int,
-  year int,
-  quarter int,
-  day_of_week int,
-  day_name varchar(9),
-  month_name varchar(9),
-  CONSTRAINT PK_ea_report_date PRIMARY KEY (date)
-);
-
 -- 🔥 Table: ea_accounts
 CREATE TABLE db_billing_report.ea_accounts
 (
@@ -56,9 +42,7 @@ CREATE TABLE db_billing_report.ea_balance_summaries
   azure_marketplace_service_charges numeric(10, 10),
   billing_frequency varchar(20),
   price_hidden bit,
-  CONSTRAINT PK_ea_balance_summaries PRIMARY KEY (enrollment_number, date),
-  CONSTRAINT FK_ea_balance_summaries_ea_report_date FOREIGN KEY (date)
-    REFERENCES db_billing_report.ea_report_date (date) 
+  CONSTRAINT PK_ea_balance_summaries PRIMARY KEY (enrollment_number, date)
 );
 
 -- 🔥 Table: ea_ri_charges
@@ -84,8 +68,6 @@ CREATE TABLE db_billing_report.ea_ri_charges
   currency varchar(10),
   billing_frequency varchar(20),
   CONSTRAINT PK_ea_ri_charges PRIMARY KEY (reservation_order_name, enrollment_number, date),
-  CONSTRAINT FK_ea_ri_charges_ea_report_date FOREIGN KEY (date)
-    REFERENCES db_billing_report.ea_report_date (date),
   CONSTRAINT FK_ea_ri_charges_ea_accounts FOREIGN KEY (enrollment_number)
     REFERENCES db_billing_report.ea_accounts (enrollment_number)
 );
@@ -110,8 +92,6 @@ CREATE TABLE db_billing_report.ea_price_sheet
   total_included_quantity numeric(15, 15),
   pretax_standard_rate numeric(15, 15),
   CONSTRAINT PK_ea_price_sheet PRIMARY KEY (enrollment_number, date, meter_id),
-  CONSTRAINT FK_ea_price_sheet_ea_report_date FOREIGN KEY (date)
-    REFERENCES db_billing_report.ea_report_date (date),
   CONSTRAINT FK_ea_price_sheet_ea_accounts FOREIGN KEY (enrollment_number)
     REFERENCES db_billing_report.ea_accounts (enrollment_number)
 );
@@ -143,8 +123,6 @@ CREATE TABLE db_billing_report.ea_detail_usage
   tags nvarchar(max),
   additional_info nvarchar(max),
   CONSTRAINT PK_ea_detail_usage PRIMARY KEY (enrollment_number, date, meter_id),
-  CONSTRAINT FK_ea_detail_usage_ea_report_date FOREIGN KEY (date)
-    REFERENCES db_billing_report.ea_report_date (date),
   CONSTRAINT FK_ea_detail_usage_ea_accounts FOREIGN KEY (enrollment_number)
     REFERENCES db_billing_report.ea_accounts (enrollment_number),
   -- CONSTRAINT FK_ea_detail_usage_ea_price_sheet FOREIGN KEY (meter_id)
